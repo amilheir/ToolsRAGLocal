@@ -36,7 +36,7 @@ with open(svg_path, "r") as file:
     svg_logo = file.read()
 
 st.set_page_config(
-    page_title="IRIS Vector Search Demo",
+    page_title="IRIS Demo Pesquisa Vetorial",
     page_icon="🤖",
     layout="wide",
 )
@@ -77,7 +77,7 @@ st.markdown(f"""
         }}
     </style>
     <header>
-        <h1 style="color:#302A96;">💻 IRIS Vector Search Demo</h1>
+        <h1 style="color:#302A96;">💻 IRIS Demo Pesquisa Vetorial</h1>
         <div class="logo-container">
             {svg_logo}
         </div>
@@ -95,7 +95,7 @@ def transcribe_audio():
     model_size = "small"
     model = WhisperModel(model_size, device='cpu', compute_type="int8")     
     if os.path.exists(file_name):
-        segments, info = model.transcribe("recorded_audio.wav", language='en', beam_size=5, vad_filter=False, initial_prompt="This is a demo from InterSystems with Roche company.")
+        segments, info = model.transcribe("recorded_audio.wav", language='pt', beam_size=5, vad_filter=False, initial_prompt="Esta é uma demonstração da InterSystems com a empresa AFIP.")
         for segment in segments:
             text = text + segment.text
         os.remove(file_name)
@@ -108,19 +108,19 @@ def text_message(submit_button):
         if text_input:
             text_message = text_input
             # Add user's message to history
-            st.session_state.messages.append({"role": "User", "content": text_message})
+            st.session_state.messages.append({"role": "Usuário", "content": text_message})
             # Generate bot's response
-            with st.spinner("LLM is processing..."):
+            with st.spinner("LLM está processando..."):
                 start_time = time.time()
                 bot_response = get_llm_response(text_message)
                 elapsed_time = time.time() - start_time
-                st.write(f"\n Response generated in {int(elapsed_time)} s.")
+                st.write(f"\n Resposta gerada em {int(elapsed_time)} s.")
             # Add bot's response to history
             st.session_state.messages.append({"role": "Bot", "content": bot_response})
             # Clear input components by re-rendering the form
             st.rerun()
         else:
-            st.warning("Please provide a text input.")
+            st.warning("Por favor, forneça uma entrada de texto.")
     return
 
 @st.fragment
@@ -128,23 +128,23 @@ def audio_message(submit_button2):
     if submit_button2:
         audio_message = None
         if audio_value:
-            with st.spinner("Transcribing audio..."):
+            with st.spinner("Transcrevendo áudio..."):
                 audio_message = transcribe_audio()
         if audio_message:
             # Add user's message to history
-            st.session_state.messages.append({"role": "User", "content": audio_message})
+            st.session_state.messages.append({"role": "Usuário", "content": audio_message})
             # Generate bot's response
-            with st.spinner("LLM is processing..."):
+            with st.spinner("LLM está processando..."):
                 start_time = time.time()
                 bot_response = get_llm_response(audio_message)
                 elapsed_time = time.time() - start_time
-                st.write(f"\n Response generated in {int(elapsed_time)} s.")
+                st.write(f"\n Resposta gerada em {int(elapsed_time)} s.")
             # Add bot's response to history
             st.session_state.messages.append({"role": "Bot", "content": bot_response})
             # Clear input components by re-rendering the form
             st.rerun()
         else:
-            st.warning("Please provide an audio recording.")
+            st.warning("Por favor, forneça uma gravação de áudio.")
 
 
 
@@ -162,24 +162,24 @@ with st.container(height=340,border=True):
 row1 = st.columns((2,1), gap="small")
 with row1[0]:
     with st.form(key="input_form1", clear_on_submit=True, border=False):
-        text_input = st.text_input("Enter your text here:", placeholder="Your message...")
+        text_input = st.text_input("Insira seu texto aqui:", placeholder="Sua mensagem...")
         row01 = st.columns((3,1), gap="small")
         with row01[1]:
-            submit_button = st.form_submit_button(label="Submit", use_container_width=True)
+            submit_button = st.form_submit_button(label="Enviar", use_container_width=True)
      
 text_message(submit_button)
         
 with row1[1]:
     with st.container(height=230, border=False):
         with st.form(key="input_form2", clear_on_submit=True, border=False):
-            with st.expander("Audio Recorder", icon="🎙️"):
-                audio_value = st.audio_input("Record a voice message:")
+            with st.expander("Gravador de Áudio", icon="🎙️"):
+                audio_value = st.audio_input("Grave uma mensagem de voz:")
                 if audio_value:
                     with open(file_name, "wb") as file:
                         file.write(audio_value.getvalue())
                         file.close()
                 row1 = st.columns((1,1), gap="small")
                 with row1[1]:
-                    submit_button2 = st.form_submit_button(label="Submit", use_container_width=True)
+                    submit_button2 = st.form_submit_button(label="Enviar", use_container_width=True)
                     
 audio_message(submit_button2)
