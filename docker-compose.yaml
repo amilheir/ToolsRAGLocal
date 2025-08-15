@@ -1,0 +1,61 @@
+services:
+  iris:
+    build:
+      args:
+        IRIS_IMAGE: ${IRIS_IMAGE}
+        IRIS_TAG: ${IRIS_TAG}
+      context: .
+      dockerfile: ./src-iris/Dockerfile
+      secrets:
+        - iris_pw
+    environment:
+      - ISC_DATA_DIRECTORY=/iris-shared/external
+      - ISC_CPF_MERGE_FILE=/iris-shared/cpf/cpfmerge.cpf
+        - gpus=all
+    volumes:
+      - ./volumes/iris:/iris-shared
+    env_file: .env
+    ports:
+      - "${IRIS_SPORT}:1972"
+      - "${IRIS_PORT}:52773"
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+  streamlit:
+    build:
+      context: ./src-streamlit
+    secrets:
+      - iris_pw
+    ports:
+      - "${STREAMLIT_PORT}:8501"
+    links:
+      - iris
+  ollama:
+    image: ollama/ollama:latest
+    ports:
+      - ${OLLAMA_PORT}:11434
+    volumes:
+      - ollama:/root/.ollama # this solution synchronizes with the docker volume and loads the model rocket fast
+    networks:
+      - llm-network
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+secrets:
+  iris_pw:
+    file: "./src-iris/irispw.txt"
+
+volumes:
+      ollama:
+
+networks:
+  llm-network:
+    driver: bridge

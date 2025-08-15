@@ -1,0 +1,15 @@
+zn "%SYS"
+do $SYSTEM.OBJ.Load("/opt/irisbuild/Installer.cls", "ck")
+set sc = ##class(App.Installer).setup()
+zn "RAG"
+s version="latest" s r=##class(%Net.HttpRequest).%New(),r.Server="pm.community.intersystems.com",r.SSLConfiguration="ISC.FeatureTracker.SSL.Config" d r.Get("/packages/zpm/"_version_"/installer"),$system.OBJ.LoadStream(r.HttpResponse.Data,"c")
+zpm "enable -map -globally"
+zpm "enable -community"
+zpm "install iris-apipub"
+zpm "install swagger-ui"
+DO $SYSTEM.SQL.Shell()
+INSERT INTO %Embedding.Config (Name, Configuration, EmbeddingClass, Description) VALUES ('multilingual-e5-large-instruct', '{"hfCachePath":"/usr/irissys/iriscache/hfcache", "modelName":"intfloat/multilingual-e5-large-instruct"}', '%Embedding.SentenceTransformers', 'multilingual 512 chunk size')
+QUIT
+do $System.OBJ.LoadDir("/opt/irisbuild/src","cuk",,1)
+do ##class(Ens.Director).SetAutoStart("Demo.DemoProduction",1)
+s ^EnsPortal.Settings("SuperUser","LastProduction") = "Demo.DemoProduction"

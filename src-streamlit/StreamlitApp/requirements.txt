@@ -1,0 +1,2 @@
+streamlit>=1.37.1
+faster_whisper>=1.1
